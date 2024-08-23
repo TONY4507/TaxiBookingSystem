@@ -8,11 +8,12 @@ import org.springframework.stereotype.Service;
 
 import com.project.TaxiBookingSystem.entity.Driver;
 import com.project.TaxiBookingSystem.entity.TripBooking;
+import com.project.TaxiBookingSystem.enums.ApprovalStatus;
 import com.project.TaxiBookingSystem.repository.DriverRepository;
 import com.project.TaxiBookingSystem.repository.TripBookingRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-
+import java.util.stream.Collectors;
 @Service
 public class DriverService {
 	
@@ -67,5 +68,17 @@ public class DriverService {
 	}
 	  public List<TripBooking> getDriverBookingHistory(int driverId) {
 	        return tripBookingRepository.findByDriverDriverId(driverId);
+	    }
+	  
+	  public List<Driver> getPendingDrivers() {
+	        return driverRepository.findAll().stream()
+	                .filter(driver -> !(driver.getApprovalStatus()==ApprovalStatus.PENDING))
+	                .collect(Collectors.toList());
+	  
+}
+	   public Driver approveDriver(int driverId) {
+	        Driver driver = driverRepository.findById(driverId).orElseThrow();
+	        driver.setApprovalStatus(ApprovalStatus.APPROVED);
+	        return driverRepository.save(driver);
 	    }
 }

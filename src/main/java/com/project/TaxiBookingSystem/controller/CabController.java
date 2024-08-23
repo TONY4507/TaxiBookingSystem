@@ -8,6 +8,8 @@ import com.project.TaxiBookingSystem.entity.Cab;
 import com.project.TaxiBookingSystem.service.CabService;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 import java.util.List;
 
@@ -27,14 +29,14 @@ public class CabController {
 
     // Add a new cab
     @PostMapping
-    public ResponseEntity<Cab> addCab(@RequestBody Cab cab) {
+    public ResponseEntity<Cab> addCab(@Valid @RequestBody Cab cab) {
         Cab newCab = cabService.addCab(cab);
         return ResponseEntity.status(201).body(newCab); // Created
     }
 
     // Update an existing cab
     @PutMapping("/{cabId}")
-    public ResponseEntity<Cab> updateCab(@PathVariable int cabId, @RequestBody Cab updatedCab) {
+    public ResponseEntity<Cab> updateCab(@PathVariable @Min(value = 1, message = "Cab ID must be greater than 0") int cabId,@Valid @RequestBody Cab updatedCab) {
         try {
             Cab cab = cabService.updateCab(cabId, updatedCab);
             return ResponseEntity.ok(cab);
@@ -45,7 +47,7 @@ public class CabController {
 
     // Delete a cab
     @DeleteMapping("/{cabId}")
-    public ResponseEntity<Void> deleteCab(@PathVariable int cabId) {
+    public ResponseEntity<Void> deleteCab(@PathVariable @Min(value = 1, message = "Cab ID must be greater than 0") int cabId) {
         try {
             cabService.deleteCab(cabId);
             return ResponseEntity.noContent().build(); // No Content
@@ -56,7 +58,7 @@ public class CabController {
 
     // Get a cab by ID
     @GetMapping("/{cabId}")
-    public ResponseEntity<Cab> getCabById(@PathVariable int cabId) {
+    public ResponseEntity<Cab> getCabById(@PathVariable @Min(value = 1, message = "Cab ID must be greater than 0") int cabId) {
         try {
             Cab cab = cabService.getCab(cabId);
             return ResponseEntity.ok(cab);

@@ -13,6 +13,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 
 @Entity
@@ -21,11 +26,17 @@ public class Driver extends User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int driverId;
     
+    @NotBlank(message = "{driver.license.required}")
+    @Size(min = 5, max = 15, message = "{driver.license.size}")
     private String licenseNumber;
     
+    @NotNull(message = "{driver.cab.required}")
     @OneToOne(cascade = CascadeType.ALL)
     private Cab cab;
   
+
+    @Min(value = 0, message = "{driver.rating.range}")
+    @Max(value = 5, message = "{driver.rating.range}")
     private float rating;
     
 

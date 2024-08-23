@@ -12,6 +12,12 @@ import com.project.TaxiBookingSystem.service.CabService;
 import com.project.TaxiBookingSystem.service.CustomerService;
 import com.project.TaxiBookingSystem.service.TripBookingService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+
 import java.util.List;
 
 @RestController
@@ -29,14 +35,14 @@ public class CustomerController {
 
     // Customer Signup
     @PostMapping("/signup")
-    public ResponseEntity<Customer> signUp(@RequestBody Customer customer) {
+    public ResponseEntity<Customer> signUp(@Valid @RequestBody Customer customer) {
         Customer newCustomer = customerService.signup(customer);
         return ResponseEntity.ok(newCustomer);
     }
 
     // Customer Login
     @PostMapping("/login")
-    public ResponseEntity<Customer> login(@RequestParam String email, @RequestParam String password) {
+    public ResponseEntity<Customer> login(@RequestParam @Email(message = "{email.invalid}")String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}") String password) {
         Customer customer = customerService.login(email, password);
         if (customer != null) {
             return ResponseEntity.ok(customer);
@@ -47,7 +53,7 @@ public class CustomerController {
 
     // Update Customer Profile
     @PutMapping("/{customerId}")
-    public ResponseEntity<Customer> updateProfile(@PathVariable int customerId, @RequestBody Customer updatedCustomer) {
+    public ResponseEntity<Customer> updateProfile(@PathVariable @Min(value = 1, message = "Customer ID must be greater than 0") int customerId, @Valid @RequestBody Customer updatedCustomer) {
         Customer customer = customerService.updateProfile(customerId, updatedCustomer);
         return ResponseEntity.ok(customer);
     }
@@ -61,25 +67,25 @@ public class CustomerController {
 
     // Book a Trip
     @PostMapping("/bookings")
-    public ResponseEntity<TripBooking> bookTrip(@RequestParam int customerId,
-    											@RequestParam int cabid,
-                                                @RequestParam String fromLocation, 
-                                                @RequestParam String toLocation, 
-                                                @RequestParam float distanceInKm) {
+    public ResponseEntity<TripBooking> bookTrip(@RequestParam @Min(value = 1, message = "Customer ID must be greater than 0") int customerId,
+    											@RequestParam @Min(value = 1, message = "Cab ID must be greater than 0") int cabid,
+                                                @RequestParam @NotEmpty(message = "From location cannot be empty") String fromLocation, 
+                                                @RequestParam @NotEmpty(message = "To location cannot be empty") String toLocation, 
+                                                @RequestParam @Min(value = 1, message = "Distance must be greater than 0 km") float distanceInKm) {
         TripBooking tripBooking = tripBookingService.bookTrip(customerId, cabid,fromLocation, toLocation, distanceInKm);
         return ResponseEntity.ok(tripBooking);
     }
 
     // Cancel a Trip
     @DeleteMapping("/bookings/{tripBookingId}")
-    public ResponseEntity<Void> cancelTrip(@PathVariable int tripBookingId, @RequestParam int customerId) {
+    public ResponseEntity<Void> cancelTrip(@PathVariable @Min(value = 1, message = "Booking ID must be greater than 0") int tripBookingId, @RequestParam @Min(value = 1, message = "Customer ID must be greater than 0") int customerId) {
     	tripBookingService.cancelTrip(tripBookingId, customerId);
         return ResponseEntity.noContent().build(); // No content to return
     }
 
     // View Booking History
     @GetMapping("/{customerId}/bookings")
-    public ResponseEntity<List<TripBooking>> viewBookingHistory(@PathVariable int customerId) {
+    public ResponseEntity<List<TripBooking>> viewBookingHistory(@PathVariable @Min(value = 1, message = "Customer ID must be greater than 0") int customerId) {
         List<TripBooking> bookingHistory = tripBookingService.viewBookingHistory(customerId);
         return ResponseEntity.ok(bookingHistory);
     }
