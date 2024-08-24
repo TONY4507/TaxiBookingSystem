@@ -1,11 +1,13 @@
 package com.project.TaxiBookingSystem.service;
 
 import java.util.List;
-import java.util.Optional;
 
+import java.util.Optional;
+import java.util.stream.Collectors;  
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.project.TaxiBookingSystem.dto.DriverDTO;
 import com.project.TaxiBookingSystem.entity.Driver;
 import com.project.TaxiBookingSystem.entity.TripBooking;
 import com.project.TaxiBookingSystem.enums.ApprovalStatus;
@@ -13,7 +15,7 @@ import com.project.TaxiBookingSystem.repository.DriverRepository;
 import com.project.TaxiBookingSystem.repository.TripBookingRepository;
 
 import jakarta.persistence.EntityNotFoundException;
-import java.util.stream.Collectors;
+
 @Service
 public class DriverService {
 	
@@ -24,11 +26,11 @@ public class DriverService {
 	    private DriverRepository driverRepository;
 
 	    public Driver login(String email, String password) {
-	        Optional<Driver> driver = driverRepository.findByUsername(email)
+	        Optional<Driver> driver = driverRepository.findByEmail(email)
 	                                  .filter(c -> c.getPassword().equals(password));
        
 		if (driver.isEmpty()) {
-		 throw new EntityNotFoundException("Driver not found with id: " );
+		 throw new EntityNotFoundException("Driver not found" );
 		}
 
 		return driver.get();
@@ -70,15 +72,29 @@ public class DriverService {
 	        return tripBookingRepository.findByDriverDriverId(driverId);
 	    }
 	  
-	  public List<Driver> getPendingDrivers() {
-	        return driverRepository.findAll().stream()
-	                .filter(driver -> !(driver.getApprovalStatus()==ApprovalStatus.PENDING))
-	                .collect(Collectors.toList());
+	  public List<DriverDTO> getPendingDrivers() {
+		  return driverRepository.findAll().stream()
+			        .filter(driver -> driver.getApprovalStatus() == ApprovalStatus.PENDING)
+			        .map(driver -> new DriverDTO(
+			                driver.getDriverId(),
+			                driver.getUsername(),
+			                driver.getPassword(),
+			                driver.getAddress(),
+			                driver.getMobileNumber(),
+			                driver.getEmail(),
+			                driver.getLicenseNumber(),
+			                driver.getCab()
+			        ))
+			        .collect(Collectors.toList());
+
 	  
 }
-	   public Driver approveDriver(int driverId) {
-	        Driver driver = driverRepository.findById(driverId).orElseThrow();
-	        driver.setApprovalStatus(ApprovalStatus.APPROVED);
-	        return driverRepository.save(driver);
-	    }
+//	   public Driver approveDriver(int driverId) {
+//	        Driver driver = driverRepository.findById(driverId).orElseThrow();
+//	        driver.setApprovalStatus(ApprovalStatus.APPROVED);
+//	        return driverRepository.save(driver);
+//	    }
+//}
+
+
 }

@@ -11,5 +11,5 @@ import com.project.TaxiBookingSystem.entity.Driver;
 public interface DriverRepository extends JpaRepository<Driver, Integer> {
     Driver findByLicenseNumber(String licenseNumber);
    // Optional<Driver> findByIsAvailableTrue();
-	Optional<Driver> findByUsername(String username);
+	Optional<Driver> findByEmail(String Email);
 }

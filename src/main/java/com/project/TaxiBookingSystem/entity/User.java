@@ -2,6 +2,7 @@ package com.project.TaxiBookingSystem.entity;
 
 
 import jakarta.persistence.MappedSuperclass;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -9,7 +10,6 @@ import jakarta.validation.constraints.Size;
 
 @MappedSuperclass
 public abstract class User {
-	
 	
 	
 	@NotBlank(message = "{customer.username.required}")

@@ -12,9 +12,8 @@ import java.util.List;
 public interface TripBookingRepository extends JpaRepository<TripBooking, Integer> {
     List<TripBooking> findByCustomerCustomerId(int customerId);
    // List<TripBooking> findByDriverId(int driverId);
-    // Find all trips by driver ID
+    
     List<TripBooking> findByDriverDriverId(int driverId);
     
-    // Find an active trip for a driver (assuming the status is used to mark active trips)
     TripBooking findByDriverDriverIdAndStatus(int driverId, boolean status);
 }

@@ -33,7 +33,7 @@ public class TripBookingService {
     @Autowired
     private CabRepository cabRepository;
 
-    public TripBooking bookTrip(int customerId, int cabId, String fromLocation, String toLocation, float distanceInKm) {
+    public TripBooking bookTrip(int customerId, String cabId, String fromLocation, String toLocation, float distanceInKm) {
         // Fetch customer details
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new EntityNotFoundException("Customer not found"));

@@ -2,6 +2,7 @@ package com.project.TaxiBookingSystem.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,6 +13,8 @@ import com.project.TaxiBookingSystem.service.CabService;
 import com.project.TaxiBookingSystem.service.CustomerService;
 import com.project.TaxiBookingSystem.service.TripBookingService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
@@ -20,8 +23,9 @@ import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
+@Tag(name = "Customer", description = "API for Customer Management")
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/customers")
 public class CustomerController {
 
     @Autowired
@@ -33,42 +37,48 @@ public class CustomerController {
     @Autowired
     private TripBookingService tripBookingService;
 
-    // Customer Signup
+    
+    @Operation(summary = "Customer SignUp", description = "Customer SignUp Endpoint")
     @PostMapping("/signup")
     public ResponseEntity<Customer> signUp(@Valid @RequestBody Customer customer) {
         Customer newCustomer = customerService.signup(customer);
         return ResponseEntity.ok(newCustomer);
     }
 
-    // Customer Login
+    @Operation(summary = "Customer Login", description = "Existing Customer can login")
     @PostMapping("/login")
-    public ResponseEntity<Customer> login(@RequestParam @Email(message = "{email.invalid}")String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}") String password) {
-        Customer customer = customerService.login(email, password);
-        if (customer != null) {
-            return ResponseEntity.ok(customer);
-        } else {
-            return ResponseEntity.status(401).body(null); // Unauthorized
-        }
+    public  ResponseEntity<String> login(@RequestParam @Email(message = "{email.invalid}")String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}") String password) {
+        try {
+    	Customer customer= customerService.login(email, password);
+            return ResponseEntity.ok("Welcome "+ customer.getUsername());
+            
+        } 
+        catch(Exception e) {
+        	return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Invalid credentials: " + e.getMessage());
+    }
     }
 
-    // Update Customer Profile
+    
+    @Operation(summary = "Customer Profile Update", description = "Customer Endpoint update data")
     @PutMapping("/{customerId}")
     public ResponseEntity<Customer> updateProfile(@PathVariable @Min(value = 1, message = "Customer ID must be greater than 0") int customerId, @Valid @RequestBody Customer updatedCustomer) {
         Customer customer = customerService.updateProfile(customerId, updatedCustomer);
         return ResponseEntity.ok(customer);
     }
 
-    // View All Available Cabs
-    @GetMapping("/cabs")
-    public ResponseEntity<List<Cab>> viewAvailableCabs() {
-        List<Cab> availableCabs = cabService.viewAvailableCabs();
-        return ResponseEntity.ok(availableCabs);
-    }
+    
+//    @Operation(summary = "Approve Customers", description = "Admin Endpoint Approve Customer request")
+//    @GetMapping("/cabs")
+//    public ResponseEntity<List<Cab>> viewAvailableCabs() {
+//        List<Cab> availableCabs = cabService.viewAvailableCabs();
+//        return ResponseEntity.ok(availableCabs);
+//    }
 
-    // Book a Trip
+    @Operation(summary = "Trip Booking", description = "Customer Can BookTrip")
     @PostMapping("/bookings")
     public ResponseEntity<TripBooking> bookTrip(@RequestParam @Min(value = 1, message = "Customer ID must be greater than 0") int customerId,
-    											@RequestParam @Min(value = 1, message = "Cab ID must be greater than 0") int cabid,
+    											@RequestParam @Min(value = 1, message = "Cab ID must be greater than 0") String cabid,
                                                 @RequestParam @NotEmpty(message = "From location cannot be empty") String fromLocation, 
                                                 @RequestParam @NotEmpty(message = "To location cannot be empty") String toLocation, 
                                                 @RequestParam @Min(value = 1, message = "Distance must be greater than 0 km") float distanceInKm) {
@@ -76,14 +86,16 @@ public class CustomerController {
         return ResponseEntity.ok(tripBooking);
     }
 
-    // Cancel a Trip
+    
+    @Operation(summary = "Cancel Booking", description = "Customer can Cancel Booking")
     @DeleteMapping("/bookings/{tripBookingId}")
     public ResponseEntity<Void> cancelTrip(@PathVariable @Min(value = 1, message = "Booking ID must be greater than 0") int tripBookingId, @RequestParam @Min(value = 1, message = "Customer ID must be greater than 0") int customerId) {
     	tripBookingService.cancelTrip(tripBookingId, customerId);
         return ResponseEntity.noContent().build(); // No content to return
     }
 
-    // View Booking History
+    
+    @Operation(summary = "Get Booking History", description = "Customer Can get Booking History")
     @GetMapping("/{customerId}/bookings")
     public ResponseEntity<List<TripBooking>> viewBookingHistory(@PathVariable @Min(value = 1, message = "Customer ID must be greater than 0") int customerId) {
         List<TripBooking> bookingHistory = tripBookingService.viewBookingHistory(customerId);

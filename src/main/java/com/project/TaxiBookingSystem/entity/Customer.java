@@ -1,7 +1,8 @@
 package com.project.TaxiBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.project.TaxiBookingSystem.enums.ApprovalStatus;
-import com.project.TaxiBookingSystem.enums.Role;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,15 +16,18 @@ import jakarta.persistence.Id;
 public class Customer extends User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private int customerId;
 
 
 //    @Enumerated(EnumType.STRING)
 //    private Role role;
-
+    @JsonIgnore
+    
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
-    // Getters and Setters
+    
+    
     public int getCustomerId() {
         return customerId;
     }

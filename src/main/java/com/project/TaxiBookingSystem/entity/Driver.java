@@ -1,5 +1,6 @@
 package com.project.TaxiBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.TaxiBookingSystem.enums.ApprovalStatus;
 
 
@@ -18,12 +19,16 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
-
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Driver extends User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     private int driverId;
     
     @NotBlank(message = "{driver.license.required}")
@@ -34,7 +39,7 @@ public class Driver extends User {
     @OneToOne(cascade = CascadeType.ALL)
     private Cab cab;
   
-
+    @JsonIgnore
     @Min(value = 0, message = "{driver.rating.range}")
     @Max(value = 5, message = "{driver.rating.range}")
     private float rating;
@@ -42,7 +47,7 @@ public class Driver extends User {
 
 //    @Enumerated(EnumType.STRING)
 //    private Role role;
-
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     private ApprovalStatus approvalStatus = ApprovalStatus.PENDING;
 

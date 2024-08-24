@@ -1,32 +1,40 @@
 package com.project.TaxiBookingSystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Cab {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int cabId;
+    private String cabNumber;
     
     private String carType;
     private float perKMRate;
     private boolean isAvailable;
   
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL,mappedBy = "cab")
     private Driver driver;
 
-	// Getters and Setters
-    public int getCabId() {
-        return cabId;
+
+    public String getCabNumber() {
+        return cabNumber;
     }
 
-    public void setCabId(int cabId) {
-        this.cabId = cabId;
+    public void setCabNumber(String cabId) {
+        this.cabNumber = cabId;
     }
 
     public String getCarType() {
