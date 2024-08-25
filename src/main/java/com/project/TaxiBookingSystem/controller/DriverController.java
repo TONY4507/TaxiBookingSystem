@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.project.TaxiBookingSystem.dto.DriverDTO;
 import com.project.TaxiBookingSystem.entity.Driver;
 import com.project.TaxiBookingSystem.entity.TripBooking;
 import com.project.TaxiBookingSystem.service.DriverService;
@@ -27,13 +28,15 @@ public class DriverController {
     @Autowired
     private DriverService driverService;
 
+    @Autowired
+    TripBookingService tripBookingService;
  
 
     @Operation(summary = "Driver SignUp", description = "Driver SignUp Endpoint")
     @PostMapping("/signup")
-    public ResponseEntity<Driver> signUp(@Valid @RequestBody Driver driver) {
-        Driver newDriver = driverService.signup(driver);
-        return ResponseEntity.ok(newDriver);
+    public ResponseEntity<DriverDTO> signUp(@Valid @RequestBody Driver driver) {
+        DriverDTO newDriver = driverService.signup(driver);
+        return ResponseEntity.status(201).body(newDriver);
     }
 
     @Operation(summary = "Driver Login", description = "Driver Login Endpoint")
@@ -51,38 +54,39 @@ public class DriverController {
 
     @Operation(summary = "Driver Trip History", description = "Driver Enpoint to get Driver History")
     @GetMapping("/{driverId}/bookings")
-    public ResponseEntity<List<TripBooking>> getDriverBookingHistory(@PathVariable @Min(value = 1, message = "Driver ID must be greater than 0")  int driverId) {
-        List<TripBooking> bookingHistory = driverService.getDriverBookingHistory(driverId);
+    public ResponseEntity<?> getDriverBookingHistory(@PathVariable @Min(value = 1, message = "Driver ID must be greater than 0")  int driverId) {
+        try {
+    	List<TripBooking> bookingHistory = tripBookingService.getConfirmedTripsByDriverId(driverId);
         return ResponseEntity.ok(bookingHistory);
+        }
+        catch(Exception e) {
+        	return ResponseEntity.status(404).body(e.getMessage());
+        }
     }
     
     
-    @Operation(summary = "Confirm Ride", description = "Driver can Confirm the Customer Ride")
-    @PutMapping("/bookings/{tripBookingId}/confirm")
-    public ResponseEntity<String> confirmBooking(@PathVariable @Min(value = 1, message = "trip ID must be greater than 0") int tripBookingId,
-                                                  @RequestParam  boolean accept,
-                                                  @RequestHeader("Authorization") String authHeader) {
-       
-            // Extract the driver ID from the authorization header or session (depends on your authentication method)
-            int driverId = extractDriverIdFromAuthHeader(authHeader);
+    @Operation(summary = "Confirm Ride", description = "Driver can Confirm the Customer Ride") 
+    @PutMapping("/confirm-booking/{tripBookingId}/{driverId}")
+    public String confirmBooking(@PathVariable int tripBookingId,@PathVariable @Min(value = 1, message = "Booking ID must be greater than 0")int driverId,@RequestParam  boolean accept) {
+        boolean isConfirmed = tripBookingService.confirmTrip(tripBookingId,driverId,accept);
 
-            // Verify if the booking belongs to the driver
-     
-            // Confirm or reject the trip
-            driverService.confirmTrip(tripBookingId,driverId, accept);
-
-       
-            return ResponseEntity.status(500).body("An unexpected error occurred.");
-        
-    }
-
-    // Method to extract driver ID from the authorization header or session
-    private int extractDriverIdFromAuthHeader(String authHeader) {
-        // Implement extraction logic based on your authentication mechanism
-        // For example, decode JWT token to extract driver ID
-        return 0; // Placeholder value
+        if (isConfirmed) {
+            return "Booking confirmed, and cab availability updated.";
+        } else {
+            return "Booking could not be confirmed. Please check the booking ID.";
+        }
     }
     
+    @Operation(summary = "Available Bookings", description = "Driver can see available Rides")
+    @GetMapping("/available-bookings/{driverId}")
+    public ResponseEntity<?> getAvailableRides(@PathVariable @Min(value = 1, message = "Booking ID must be greater than 0")int driverId) {
+        try {
+    	return ResponseEntity.ok(tripBookingService.getAvailableRides(driverId));
+        }
+        catch(Exception e) {
+        	return ResponseEntity.status(404).body(e.getMessage());
+        }
+    }
     
 
 }

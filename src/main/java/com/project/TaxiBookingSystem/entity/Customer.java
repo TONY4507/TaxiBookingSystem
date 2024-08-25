@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 
 
 @Entity
+
 public class Customer extends User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.project.TaxiBookingSystem.enums.ApprovalStatus;
 
 
-import com.project.TaxiBookingSystem.enums.Role;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

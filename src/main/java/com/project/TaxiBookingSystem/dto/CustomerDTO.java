@@ -13,9 +13,11 @@ import lombok.Setter;
 
 @Data
 @AllArgsConstructor
-
+@NoArgsConstructor
 public class CustomerDTO {
    
+
+
 	private int CustomerId;
 
 	@NotBlank(message = "{customer.username.required}")

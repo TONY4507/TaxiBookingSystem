@@ -22,6 +22,7 @@ public class DriverDTO {
 	
 	 	@NotBlank(message = "Name is required")
 	 	private int Driverid;
+	 	
 	 	@NotBlank(message = "{customer.username.required}")
 		@Size(min = 3, max = 10, message = "{size.range}")
 		private String username;
@@ -47,7 +48,7 @@ public class DriverDTO {
 	    
 	    @NotNull(message = "{driver.cab.required}")
 	    @OneToOne(cascade = CascadeType.ALL)
-	    private Cab cab;
+	    private CabDTO cab;
 	  
 
 

@@ -22,7 +22,7 @@ public class CabService {
         return cabRepository.save(cab);
     }
     public List<Cab> viewAvailableCabs() {
-        return cabRepository.findByIsAvailableTrue(); // Assuming this repository method exists
+        return cabRepository.findByIsAvailableTrue(); 
     }
 
     public Cab updateCab(String id, Cab cabDetails) {
@@ -44,6 +44,12 @@ public class CabService {
     	 return cab.get();
     }
     public void deleteCab(String id) {
+    	Optional<Cab> cab= cabRepository.findById(id);
+    	
+        if (cab.isEmpty()) {
+           
+            throw new EntityNotFoundException("Cab not found with ID: " + id);
+        }
         cabRepository.deleteById(id);
     }
 }

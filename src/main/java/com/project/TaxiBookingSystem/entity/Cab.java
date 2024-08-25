@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +21,14 @@ public class Cab {
     @Id
     private String cabNumber;
     
+    @NotNull
+    
     private String carType;
+    
+    @NotNull
     private float perKMRate;
+    
+    @NotNull
     private boolean isAvailable;
   
     @JsonIgnore

@@ -2,8 +2,10 @@ package com.project.TaxiBookingSystem.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +16,7 @@ import com.project.TaxiBookingSystem.dto.CustomerDTO;
 import com.project.TaxiBookingSystem.dto.DriverDTO;
 
 import com.project.TaxiBookingSystem.service.AdminService;
+import com.project.TaxiBookingSystem.service.CabService;
 import com.project.TaxiBookingSystem.service.CustomerService;
 import com.project.TaxiBookingSystem.service.DriverService;
 
@@ -36,6 +39,8 @@ public class AdminController {
     @Autowired
     private DriverService driverService;
     
+    @Autowired
+    private CabService cabService;
     
     @Operation(summary = "Pending Customers", description = "Admin Endpoint Get Pending Customer")
     @GetMapping("/pending/customers")
@@ -60,7 +65,7 @@ public class AdminController {
         }
         catch(Exception e) {
        	 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Customer not found with ID: " + customerId);
+                    .body("Customer not found or Already Approved with ID: " + customerId);
        	
        }
     }
@@ -75,7 +80,7 @@ public class AdminController {
         
         catch(Exception e) {
         	 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                     .body("Driver not found with ID: " + driverId);
+                     .body("Driver not found or Already Approved with ID: " + driverId);
         	
         }
     
@@ -108,4 +113,5 @@ public class AdminController {
        	
        }
     }
+    
 }

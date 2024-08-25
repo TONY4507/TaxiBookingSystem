@@ -12,11 +12,13 @@ import java.util.List;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
-	Optional<Customer> findByEmail(String email);
-	Optional<Customer> findByUsername(String username);
+	   Optional<Customer> findByUsernameIgnoreCase(String username);
+	    Optional<Customer> findByEmailIgnoreCase(String email);
+	    Optional<Customer> findByMobileNumber(String phoneNumber);
    
 	List<Customer> findByApprovalStatus(ApprovalStatus approvalStatus);
     List<Customer> findByCustomerId(int customerId);
-
+    
+    void deleteByEmail(String email);
    
 }

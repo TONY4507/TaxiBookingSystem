@@ -1,6 +1,7 @@
 package com.project.TaxiBookingSystem.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -30,8 +31,13 @@ public class CabController {
 
     @Operation(summary = "Get all Available Cabs", description = "This is collection of Cab")
     @GetMapping("/available")
-    public ResponseEntity<List<Cab>> getAvailableCabs() {
+    public ResponseEntity<?> getAvailableCabs() {
         List<Cab> availableCabs = cabService.viewAvailableCabs();
+
+        if (availableCabs.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Currently, no available cabs");
+        }
+
         return ResponseEntity.ok(availableCabs);
     }
 
@@ -47,22 +53,12 @@ public class CabController {
     public ResponseEntity<Object> updateCab(@PathVariable @NotEmpty(message = "Cab ID must required") String cabId,@Valid @RequestBody Cab updatedCab) {
         try {
             Cab cab = cabService.updateCab(cabId, updatedCab);
-            return ResponseEntity.ok(cab);
+            return ResponseEntity.status(202).body(cab);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(404).body(e.getMessage()); // Not Found
+            return ResponseEntity.status(404).body(e.getMessage());
         }
     }
 
-    @Operation(summary = "Delete Cabs", description = "This Endpoint Updates Deletes Cabs")
-    @DeleteMapping("/{cabId}")
-    public ResponseEntity<Void> deleteCab(@PathVariable @NotEmpty(message = "Cab ID Required") String cabId) {
-        try {
-            cabService.deleteCab(cabId);
-            return ResponseEntity.noContent().build(); // No Content
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(404).body(null); // Not Found
-        }
-    }
 
 
     @Operation(summary = "Get Single Cab By ID", description = "This Endpoint Gives Single Cab Data")
@@ -75,9 +71,20 @@ public class CabController {
             
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            // Handle any other unexpected exceptions
            
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+    
+    @Operation(summary = "Delete Cabs", description = "This Endpoint Updates Deletes Cabs")
+    @DeleteMapping("/{cabId}")
+    public ResponseEntity<Object> deleteCab(@PathVariable @NotEmpty(message = "Cab ID Required") String cabId) {
+        try {
+            cabService.deleteCab(cabId);
+            return ResponseEntity.status(200).body("Deleted successfully");// No Content
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(404).body(e.getMessage()); // Not Found
+        }
+    }
+
 }

@@ -2,12 +2,17 @@ package com.project.TaxiBookingSystem.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -19,19 +24,23 @@ public class TripBooking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int tripBookingId;
     
-
+    
     @ManyToOne
-    @JoinColumn(name = "customer_id")
+    @JoinColumn(name = "customer_id",nullable = true)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "driver_id", referencedColumnName = "driverId")
+    @JoinColumn(name = "driver_id", referencedColumnName = "driverId",nullable = true)
     private Driver driver;
     
     private String fromLocation;
     private String toLocation;
+    
+    @NotNull(message = "{not.blank}")
+    @Future
     private LocalDateTime toDateTime;
-    private boolean status;
+    private boolean bookingConfirm=false;
     private float distanceInKM;
     private float bill;
 
@@ -84,12 +93,12 @@ public class TripBooking {
         this.toDateTime = toDateTime;
     }
 
-    public boolean isStatus() {
-        return status;
+    public boolean isbookingConfirm() {
+        return bookingConfirm;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setbookingConfirm(boolean bookingConfirm) {
+        this.bookingConfirm = bookingConfirm;
     }
 
     public float getDistanceInKM() {
