@@ -1,8 +1,10 @@
 package com.project.TaxiBookingSystem;
 
+import com.project.TaxiBookingSystem.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -10,13 +12,19 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private String secretKey = "TONY"; // Use a secure key in production
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    public String generateToken(String username) {
+    @Value("${jwt.expiration}")
+    private long expirationMillis;
+
+    public String generateToken(String username, Role role, Integer userId) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("role", role.name())
+                .claim("userId", userId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }

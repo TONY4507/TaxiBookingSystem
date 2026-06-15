@@ -5,11 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.project.TaxiBookingSystem.dto.AuthResponse;
 import com.project.TaxiBookingSystem.dto.DriverDTO;
 import com.project.TaxiBookingSystem.entity.Driver;
 import com.project.TaxiBookingSystem.entity.TripBooking;
+import com.project.TaxiBookingSystem.enums.Role;
 import com.project.TaxiBookingSystem.service.DriverService;
 import com.project.TaxiBookingSystem.service.TripBookingService;
+import com.project.TaxiBookingSystem.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,6 +32,9 @@ public class DriverController {
     private DriverService driverService;
 
     @Autowired
+    private JwtUtil jwtUtil;
+
+    @Autowired
     TripBookingService tripBookingService;
  
 
@@ -41,29 +47,23 @@ public class DriverController {
 
     @Operation(summary = "Driver Login", description = "Driver Login Endpoint")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam @Email(message = "Please provide correct Email")String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}")String password) {
+    public ResponseEntity<?> login(@RequestParam @Email(message = "Please provide correct Email") String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}") String password) {
         try {
             Driver driver = driverService.login(email, password);
-            DriverDTO driverDTO = new DriverDTO(
+            String token = jwtUtil.generateToken(driver.getEmail(), Role.ROLE_DRIVER, driver.getDriverId());
+            AuthResponse response = new AuthResponse(
+                    token,
                     driver.getDriverId(),
                     driver.getUsername(),
-                    driver.getPassword(),
-                    driver.getAddress(),
-                    driver.getMobileNumber(),
                     driver.getEmail(),
-                    driver.getLicenseNumber(),
-                    driver.getCab() == null ? null : new com.project.TaxiBookingSystem.dto.CabDTO(
-                            driver.getCab().getCabNumber(),
-                            driver.getCab().getCarType(),
-                            driver.getCab().getPerKMRate(),
-                            driver.getCab().isAvailable()
-                    )
+                    Role.ROLE_DRIVER,
+                    driver.getApprovalStatus()
             );
-            return ResponseEntity.ok(driverDTO);
+            return ResponseEntity.ok(response);
         }
         catch(Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body("Invalid credentials: " + e.getMessage()); // Unauthorized
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid credentials: " + e.getMessage());
         }
     }
 

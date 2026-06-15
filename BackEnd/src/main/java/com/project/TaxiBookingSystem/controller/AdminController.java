@@ -2,27 +2,35 @@ package com.project.TaxiBookingSystem.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.TaxiBookingSystem.dto.AuthResponse;
+import com.project.TaxiBookingSystem.dto.LoginRequest;
 import com.project.TaxiBookingSystem.dto.CustomerDTO;
 import com.project.TaxiBookingSystem.dto.DriverDTO;
+import com.project.TaxiBookingSystem.enums.Role;
 
 import com.project.TaxiBookingSystem.service.AdminService;
 import com.project.TaxiBookingSystem.service.CabService;
 import com.project.TaxiBookingSystem.service.CustomerService;
 import com.project.TaxiBookingSystem.service.DriverService;
+import com.project.TaxiBookingSystem.JwtUtil;
 
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Admin", description = "API for Tenant Management")
@@ -41,7 +49,50 @@ public class AdminController {
     
     @Autowired
     private CabService cabService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Value("${admin.username}")
+    private String adminUsername;
+
+    @Value("${admin.password}")
+    private String adminPassword;
     
+    @Operation(summary = "Admin Login", description = "Login as the admin user")
+    @PostMapping("/login")
+    public ResponseEntity<?> login(
+            @RequestBody(required = false) LoginRequest request,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String password) {
+        if (request != null) {
+            email = request.getEmail();
+            password = request.getPassword();
+        }
+
+        if (email == null || password == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Email and password are required");
+        }
+
+        try {
+            adminService.login(email, password);
+        } catch (Exception ex) {
+            if (!(adminUsername.equalsIgnoreCase(email) && adminPassword.equals(password))) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid admin credentials");
+            }
+        }
+
+        AuthResponse response = new AuthResponse(
+                jwtUtil.generateToken(email, Role.ROLE_ADMIN, null),
+                null,
+                "admin",
+                email,
+                Role.ROLE_ADMIN,
+                null
+        );
+        return ResponseEntity.ok(response);
+    }
+
     @Operation(summary = "Pending Customers", description = "Admin Endpoint Get Pending Customer")
     @GetMapping("/pending/customers")
     public ResponseEntity<List<CustomerDTO>> getPendingCustomers() {

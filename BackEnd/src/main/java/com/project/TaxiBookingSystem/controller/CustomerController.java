@@ -7,14 +7,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.project.TaxiBookingSystem.dto.AuthResponse;
 import com.project.TaxiBookingSystem.dto.CustomerDTO;
 import com.project.TaxiBookingSystem.entity.Cab;
 import com.project.TaxiBookingSystem.entity.Customer;
 import com.project.TaxiBookingSystem.entity.TripBooking;
+import com.project.TaxiBookingSystem.enums.Role;
 import com.project.TaxiBookingSystem.exception.EntityNotFoundException;
 import com.project.TaxiBookingSystem.service.CabService;
 import com.project.TaxiBookingSystem.service.CustomerService;
 import com.project.TaxiBookingSystem.service.TripBookingService;
+import com.project.TaxiBookingSystem.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,7 +41,8 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
- 
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Autowired
     private TripBookingService tripBookingService;
@@ -59,21 +63,22 @@ public class CustomerController {
 
     @Operation(summary = "Customer Login", description = "Existing Customer can login")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam @Email(message = "{email.invalid}")String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}") String password) {
+    public ResponseEntity<?> login(@RequestParam @Email(message = "{email.invalid}") String email, @RequestParam @Size(min = 8, max = 20, message = "{customer.password.size}") String password) {
         try {
             Customer customer = customerService.login(email, password);
-            CustomerDTO customerDTO = new CustomerDTO(
+            String token = jwtUtil.generateToken(customer.getEmail(), Role.ROLE_CUSTOMER, customer.getCustomerId());
+            AuthResponse response = new AuthResponse(
+                    token,
                     customer.getCustomerId(),
                     customer.getUsername(),
-                    customer.getPassword(),
-                    customer.getAddress(),
-                    customer.getMobileNumber(),
-                    customer.getEmail()
+                    customer.getEmail(),
+                    Role.ROLE_CUSTOMER,
+                    customer.getApprovalStatus()
             );
-            return ResponseEntity.ok(customerDTO);
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body("Invalid credentials: " + e.getMessage());
         }
     }

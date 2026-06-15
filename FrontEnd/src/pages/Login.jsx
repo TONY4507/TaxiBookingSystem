@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Paper, Box, TextField, Button, Typography, ToggleButton, ToggleButtonGroup, Stack, CircularProgress } from '@mui/material'
-import api from '../api'
+import api, { setAuthToken } from '../api'
 import { useNavigate } from 'react-router-dom'
 import SectionHeader from '../components/SectionHeader'
 
@@ -16,17 +16,22 @@ export default function Login(){
     setError(null)
     setLoading(true)
     try {
-      const url = role === 'customer' ? '/customers/login' : '/drivers/login'
+      const url = role === 'customer' ? '/customers/login' : role === 'driver' ? '/drivers/login' : '/admin/login'
       const res = await api.post(url, null, { params: { email, password } })
-      const dto = res.data || {}
+      const data = res.data || {}
       const userObj = {
-        ...dto,
-        role,
-        id: dto.CustomerId || dto.Driverid || dto.DriverId || dto.customerId || dto.driverId || dto.id,
-        name: dto.username || dto.name || dto.username,
+        role: data.role?.replace('ROLE_', '').toLowerCase(),
+        token: data.token,
+        id: data.userId,
+        username: data.username,
+        email: data.email,
+        approvalStatus: data.approvalStatus,
       }
+      setAuthToken(data.token)
       localStorage.setItem('user', JSON.stringify(userObj))
-      nav(role === 'driver' ? '/driver' : '/customer')
+      if (role === 'admin') nav('/admin')
+      else if (role === 'driver') nav('/driver')
+      else nav('/customer')
     } catch (e) {
       setError(e.response?.data || e.message)
     } finally {
@@ -41,6 +46,7 @@ export default function Login(){
         <ToggleButtonGroup value={role} exclusive onChange={(e, val) => val && setRole(val)} sx={{ alignSelf: 'center' }}>
           <ToggleButton value="customer">Customer</ToggleButton>
           <ToggleButton value="driver">Driver</ToggleButton>
+          <ToggleButton value="admin">Admin</ToggleButton>
         </ToggleButtonGroup>
         <TextField label="Email address" type="email" value={email} onChange={e => setEmail(e.target.value)} fullWidth />
         <TextField label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} fullWidth />
