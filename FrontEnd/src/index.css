@@ -1,0 +1,38 @@
+:root {
+  --primary: #0b6cf7;
+  --secondary: #ffb300;
+  --bg: #f4f7ff;
+  --surface: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+  font-family: Inter, Roboto, sans-serif;
+  color: var(--text);
+  background: radial-gradient(circle at top, rgba(11,108,247,0.12), transparent 30%), linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+}
+
+body {
+  background-color: var(--bg);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button, input, textarea, select {
+  font: inherit;
+}
+
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid rgba(11,108,247,0.35);
+  outline-offset: 2px;
+}
